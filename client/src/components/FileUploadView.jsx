@@ -77,6 +77,7 @@ const FileUploadView = () => {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      console.log('Targeting API URL:', apiUrl); // Debug log
       const response = await fetch(`${apiUrl}/api/upload`, {
         method: 'POST',
         body: formData,
