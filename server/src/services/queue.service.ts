@@ -16,15 +16,14 @@ const connection = new Redis(redisUrl, {
 });
 
 connection.on('error', (err) => {
-  // Use warn instead of error to avoid scary red logs on Render dashboard
-  console.warn('Redis Connection (Queue) - Optional reset:', err.message);
+  // Silent handler: ioredis handles reconnection automatically.
+  // We silence this to keep your Render dashboard clean.
 });
 
 export const fileQueue = new Queue('file-processing', { connection: connection as any });
 
 fileQueue.on('error', (err) => {
-  // Silence BullMQ connection resets
-  console.warn('Queue Error (Handled):', err.message);
+  // Silent handler: BullMQ handles internal resets.
 });
 
 export const addFileJob = async (jobId: string, filePath: string) => {

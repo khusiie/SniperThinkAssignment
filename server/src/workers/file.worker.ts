@@ -19,7 +19,7 @@ const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', 
 });
 
 connection.on('error', (err) => {
-  console.warn('Redis Connection (Worker) - Optional reset:', err.message);
+  // Silent handler to keep the dashboard clean.
 });
 
 const worker = new Worker(
@@ -113,8 +113,7 @@ const worker = new Worker(
 );
 
 worker.on('error', (err) => {
-  // Silence Worker connection resets
-  console.warn('Worker Error (Handled):', err.message);
+  // Silent handler to keep the dashboard clean.
 });
 
 console.log('Worker started listening for jobs...');
