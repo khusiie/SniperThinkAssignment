@@ -53,7 +53,7 @@ A premium, high-performance file processing system built with React, Node.js, an
 
 ---
 
-## 💻 Local Setup
+##  Local Setup
 
 1. **Clone the Repo**
 2. **Setup Backend**
