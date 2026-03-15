@@ -1,77 +1,87 @@
-# SniperThink Assignment - Setup Instructions
+# SniperThink - Distributed File Processing System
 
-This project consists of a React frontend (Client) and a Node.js/Express backend (Server) with an asynchronous processing system using BullMQ and Redis.
+A premium, high-performance file processing system built with React, Node.js, and a distributed job queue architecture.
 
-## Prerequisites
-- Node.js (v18+)
-- Redis (installed and running)
-- PostgreSQL (or another database supported by Prisma)
-
-## Project Structure
-- `/client`: React + Vite + Tailwind CSS
-- `/server`: Node.js + Express + Prisma + BullMQ
+🚀 **Live Site**: [https://sniperthinkassignment.onrender.com/](https://sniperthinkassignment.onrender.com/)
 
 ---
 
-## Backend Setup (Server)
+## ⚡ Key Features
+- **Neural Document Processing**: Asynchronous file analysis (PDF/TXT) using BullMQ workers.
+- **Distributed Queue**: Scalable job management via Upstash Redis.
+- **Managed Auth & DB**: PostgreSQL hosted on Supabase (Prisma ORM).
+- **Elite UI**: High-fidelity dark-mode interface with Framer Motion animations.
+- **Health Diagnostics**: Real-time connection status monitoring in the UI.
 
-1. **Install Dependencies**:
+---
+
+## 🛠️ Stack
+- **Frontend**: React, Vite, Framer Motion, Lucide Icons, Vanilla CSS (Elite Aesthetics).
+- **Backend**: Node.js, Express, TypeScript, Multer.
+- **Message Broker**: Redis (via Upstash).
+- **Database**: PostgreSQL (via Supabase).
+- **ORM**: Prisma.
+
+---
+
+## 🚀 Deployment Guide (Render)
+
+### 1. Database (Supabase)
+- Create a project on [Supabase](https://supabase.com/).
+- Copy the **Connection String** (Transaction mode recommended).
+
+### 2. Redis (Upstash)
+- Create a Redis instance on [Upstash](https://upstash.com/).
+- **Critical**: Ensure TLS is enabled. Use the provided `rediss://` URL.
+
+### 3. Backend Deployment (Render)
+- Create a **Web Service** pointing to the `/server` folder.
+- **Build Command**: `npm install && npx prisma generate && npm run build`
+- **Start Command**: `npm start`
+- **Environment Variables**:
+  - `DATABASE_URL`: Your Supabase connection string.
+  - `REDIS_URL`: Your Upstash Redis URL (starts with `rediss://`).
+  - `FRONTEND_URL`: `https://sniperthinkassignment.onrender.com`
+  - `PORT`: `10000`
+
+### 4. Frontend Deployment (Render)
+- Create a **Static Site** pointing to the `/client` folder.
+- **Build Command**: `npm install && npm run build`
+- **Publish Directory**: `dist`
+- **Environment Variables**:
+  - `VITE_API_URL`: Your backend service URL (e.g. `https://sniper-kwf7.onrender.com`).
+
+---
+
+## 💻 Local Setup
+
+1. **Clone the Repo**
+2. **Setup Backend**
    ```bash
    cd server
    npm install
-   ```
-
-2. **Environment Variables**:
-   Create a `.env` file in the `server` directory:
-   ```env
-   DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-   REDIS_URL="redis://localhost:6379"
-   PORT=5000
-   ```
-
-3. **Database Setup**:
-   ```bash
-   npx prisma migrate dev --name init
    npx prisma generate
-   ```
-
-4. **Run the Server**:
-   ```bash
    npm run dev
    ```
-
----
-
-## Frontend Setup (Client)
-
-1. **Install Dependencies**:
+3. **Setup Frontend**
    ```bash
    cd client
    npm install
-   ```
-
-2. **Run the Frontend**:
-   ```bash
    npm run dev
    ```
 
 ---
 
-## System Architecture
+## 🔐 Environment Variables Summary
 
-### Distributed File Processing
-- **Multer**: Handles file uploads and enforces a 10MB limit.
-- **Prisma**: Managed the PostgreSQL database for storing users, files, and processing results.
-- **BullMQ**: Manages the job queue with automatic retries (3 attempts).
-- **Redis**: Acts as the message broker for the queue.
-- **Worker**: An asynchronous process that parses PDF/TXT files, extracts metadata, and updates the database.
-
-### Concurrency & Scalability
-The worker is configured with a concurrency of `5`, allowing it to process multiple files simultaneously.
+| Variable | Service | Purpose |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | Backend | Supabase PostgreSQL connection |
+| `REDIS_URL` | Backend | Upstash Redis connection (with TLS) |
+| `FRONTEND_URL` | Backend | CORS security (Restricts API access) |
+| `VITE_API_URL` | Frontend | Targeted Backend API URL |
 
 ---
 
-## Troubleshooting
-- **Redis Error**: Ensure Redis is running on port 6379.
-- **Database Error**: Verify the `DATABASE_URL` in your `.env` file.
-- **pdf-parse Error**: Ensure you are using the modern `pdf-parse` (v2.4.5+) which uses the `PDFParse` class.
+## 📝 API Documentation
+Detailed endpoint specifications can be found in [API_DOCUMENTATION.md](API_DOCUMENTATION.md).

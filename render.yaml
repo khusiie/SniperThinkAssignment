@@ -12,11 +12,27 @@ services:
           name: sniper-db
           property: connectionString
       - key: REDIS_URL
-        sync: false # User to provide from Upstash or similar
+        sync: false # User to provide from Upstash (rediss://...)
+      - key: FRONTEND_URL
+        value: https://sniperthinkassignment.onrender.com
       - key: PORT
-        value: 5000
+        value: 10000
       - key: NODE_ENV
         value: production
+
+  # Frontend Static Site
+  - type: static
+    name: sniper-client
+    env: static
+    plan: free
+    buildCommand: cd client && npm install && npm run build
+    staticPublishDir: client/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: sniper-server
+          property: host
 
   # Managed PostgreSQL Database
   - type: db

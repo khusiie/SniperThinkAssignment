@@ -2,83 +2,68 @@
 
 This document outlines the API endpoints available in the SniperThink backend.
 
-## Base URL
-`http://localhost:5000/api`
+## Base URLs
+- **Live**: `https://sniper-kwf7.onrender.com/api`
+- **Local**: `http://localhost:5000/api`
 
 ---
 
-## 1. File Upload
-Allows users to upload a file (PDF or TXT) for asynchronous processing.
+## 🚦 System Health
 
+### 1. Health Check
+Quickly verify server and database connectivity.
+*   **URL**: `/health`
+*   **Method**: `GET`
+*   **Success Response**: `200 OK`
+*   **Content**: `{"status": "ok", "serverTime": "2026-..."}`
+
+### 2. Connection Ping
+Lightweight endpoint for frontend connectivity testing.
+*   **URL**: `/ping`
+*   **Method**: `GET`
+*   **Success Response**: `200 OK`
+*   **Content**: `pong`
+
+---
+
+## 📂 File Processing
+
+### 3. File Upload
+Upload a file (PDF or TXT) for asynchronous processing.
 *   **URL**: `/upload`
 *   **Method**: `POST`
 *   **Content-Type**: `multipart/form-data`
 *   **Body**:
     *   `file`: The file to upload (Max 10MB).
-    *   `userId`: The UUID of the user uploading the file.
-*   **Success Response**:
-    *   **Code**: `201 CREATED`
-    *   **Content**:
-        ```json
-        {
-          "message": "File uploaded and job queued",
-          "jobId": "a1b2c3d4-..."
-        }
-        ```
-*   **Error Response**:
-    *   **Code**: `400 BAD REQUEST` (Missing file, missing userId, or invalid file type).
-    *   **Code**: `500 INTERNAL SERVER ERROR`
+    *   `userId`: The UUID/String of the user uploading the file.
+*   **Success Response**: `201 CREATED`
+*   **Content**: `{"message": "File uploaded and job queued", "jobId": "..."}`
 
----
-
-## 2. Job Status & Results
+### 4. Job Status & Results
 Retrieve the current status and processed results of a specific job.
-
 *   **URL**: `/job/:id`
 *   **Method**: `GET`
-*   **URL Params**: `id=[string]` (The jobId returned during upload).
-*   **Success Response**:
-    *   **Code**: `200 OK`
-    *   **Content (Processing)**:
-        ```json
-        {
-          "id": "a1b2c3d4-...",
-          "status": "PROCESSING",
-          "progress": 50,
-          "result": null
-        }
-        ```
-    *   **Content (Completed)**:
-        ```json
-        {
-          "id": "a1b2c3d4-...",
-          "status": "COMPLETED",
-          "progress": 100,
-          "result": {
-            "wordCount": 1200,
-            "paragraphCount": 35,
-            "keywords": ["system", "data", "process"]
-          }
-        }
-        ```
-*   **Error Response**:
-    *   **Code**: `404 NOT FOUND` (Job not found).
+*   **Success Response**: `200 OK`
+*   **Content (Completed)**:
+    ```json
+    {
+      "id": "...",
+      "status": "COMPLETED",
+      "result": {
+        "wordCount": 1200,
+        "paragraphCount": 35,
+        "keywords": ["system", "data"]
+      }
+    }
+    ```
 
 ---
 
-## 3. Simple Interest (Part 1)
-Endpoint to record user interest in a specific strategy step.
+## 📈 Lead Generation
 
+### 5. Strategy Interest (Part 1)
+Record user interest in specific strategy steps.
 *   **URL**: `/interest`
 *   **Method**: `POST`
-*   **Body**:
-    ```json
-    {
-      "name": "John Doe",
-      "email": "john@example.com",
-      "step": "Identify Audience"
-    }
-    ```
-*   **Success Response**:
-    *   **Code**: `200 OK`
-    *   **Content**: `{"message": "Interest recorded successfully"}`
+*   **Body**: `{"name": "...", "email": "...", "step": "..."}`
+*   **Success Response**: `200 OK`
