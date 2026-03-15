@@ -1,0 +1,4 @@
+Testing file parse for D:\sniperThinkAssignment\server\uploads\file-1773493877804-383892209.pdf
+Buffer read, size: 192090
+PARSE ERROR CAUGHT: TypeError: pdf is not a function
+    at main (D:\sniperThinkAssignment\server\test_pdf.js:18:27)
