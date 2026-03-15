@@ -41,8 +41,17 @@ export const uploadFile = async (req: Request, res: Response) => {
       jobId: jobRecord.id,
     });
   } catch (error: any) {
-    console.error('Upload Error:', error);
-    res.status(500).json({ error: error.message || 'Internal server error' });
+    console.error('CRITICAL UPLOAD ERROR:', {
+      message: error.message,
+      stack: error.stack,
+      file: file ? { path: file.path, size: file.size } : 'NONE',
+      userId
+    });
+    res.status(500).json({ 
+      error: 'Backend Failure', 
+      details: error.message,
+      tip: 'Check Render logs for the CRITICAL UPLOAD ERROR block'
+    });
   }
 };
 
