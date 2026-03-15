@@ -9,7 +9,7 @@ const FileUploadView = () => {
   const [jobResult, setJobResult] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isDragging, setIsDragging] = useState(false);
-  
+
   const fileInputRef = useRef(null);
 
   const handleDragOver = (e) => {
@@ -24,7 +24,7 @@ const FileUploadView = () => {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFile = e.dataTransfer.files[0];
       validateAndSetFile(droppedFile);
@@ -41,9 +41,9 @@ const FileUploadView = () => {
     // Only accept txt, pdf, jpg, png (matching backend)
     const validTypes = ['text/plain', 'application/pdf', 'image/jpeg', 'image/png'];
     const validExtensions = ['.txt', '.pdf', '.jpg', '.jpeg', '.png'];
-    
+
     const isExtensionValid = validExtensions.some(ext => selectedFile.name.toLowerCase().endsWith(ext));
-    
+
     if (validTypes.includes(selectedFile.type) || isExtensionValid) {
       setFile(selectedFile);
       setStatus('idle');
@@ -68,31 +68,33 @@ const FileUploadView = () => {
 
   const handleUpload = async () => {
     if (!file) return;
-    
+
     setStatus('uploading');
-    
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('userId', 'user_123');
 
     try {
       let apiUrl = import.meta.env.VITE_API_URL;
-      
       if (!apiUrl) {
         const hostname = window.location.hostname;
-        if (hostname.includes('onrender.com')) {
-          const serverName = hostname.replace('-client', '-server');
-          apiUrl = `https://${serverName}`;
-        } else {
-          apiUrl = 'http://localhost:5000';
-        }
+        apiUrl = hostname.includes('onrender.com')
+          ? `https://${hostname.replace('-client', '-server')}`
+          : 'http://localhost:5000';
+      }
+
+      // 1. Pre-upload health check
+      console.log(' Checking backend health before upload...');
+      const healthRes = await fetch(`${apiUrl}/api/health`).catch(() => null);
+      if (!healthRes || !healthRes.ok) {
+        throw new Error('Backend is currently unreachable (it might be sleeping or restarting).');
       }
 
       console.log('🚀 Initiating upload sequence to:', `${apiUrl}/api/upload`);
-      
-      // Use AbortController for a 15-second timeout
+
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
 
       const response = await fetch(`${apiUrl}/api/upload`, {
         method: 'POST',
@@ -106,15 +108,16 @@ const FileUploadView = () => {
       }
 
       const data = await response.json();
-      console.log('✅ Upload successful, jobId:', data.jobId);
       setJobId(data.jobId);
       setStatus('processing');
     } catch (err) {
       console.error('❌ UPLOAD FAILURE:', err);
       setStatus('error');
-      
+
       if (err.name === 'AbortError') {
-        setErrorMessage('Connection timed out. Is the backend URL correct?');
+        setErrorMessage('Connection timed out. The server might be struggling with the request.');
+      } else if (err.message.includes('ECONNRESET') || err.message.includes('Failed to fetch')) {
+        setErrorMessage('Server connection was reset. This usually means the backend crashed or restarted. Please check Render logs.');
       } else {
         setErrorMessage(err.message || 'Upload failed. Check server status/logs.');
       }
@@ -124,21 +127,21 @@ const FileUploadView = () => {
   // Poll for job status
   useEffect(() => {
     let interval;
-    
+
     const checkJobStatus = async () => {
       try {
         let apiUrl = import.meta.env.VITE_API_URL;
         if (!apiUrl) {
           const hostname = window.location.hostname;
-          apiUrl = hostname.includes('onrender.com') 
-            ? `https://${hostname.replace('-client', '-server')}` 
+          apiUrl = hostname.includes('onrender.com')
+            ? `https://${hostname.replace('-client', '-server')}`
             : 'http://localhost:5000';
         }
 
         const response = await fetch(`${apiUrl}/api/job/${jobId}`);
         if (response.ok) {
           const data = await response.json();
-          
+
           if (data.status === 'COMPLETED') {
             setJobResult(data.result);
             setStatus('success');
@@ -171,11 +174,11 @@ const FileUploadView = () => {
         let apiUrl = import.meta.env.VITE_API_URL;
         if (!apiUrl) {
           const hostname = window.location.hostname;
-          apiUrl = hostname.includes('onrender.com') 
-            ? `https://${hostname.replace('-client', '-server')}` 
+          apiUrl = hostname.includes('onrender.com')
+            ? `https://${hostname.replace('-client', '-server')}`
             : 'http://localhost:5000';
         }
-        
+
         const res = await fetch(`${apiUrl}/api/health`, { method: 'GET' });
         if (res.ok) setConnStatus('online');
         else setConnStatus('offline');
@@ -200,7 +203,7 @@ const FileUploadView = () => {
       boxShadow: "0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
       fontFamily: "'Inter', sans-serif"
     }}>
-      
+
       <div style={{ marginBottom: "24px", textAlign: "center", position: "relative" }}>
         {/* Connection Indicator */}
         <div style={{
@@ -249,7 +252,7 @@ const FileUploadView = () => {
             display: "inline-block"
           }}>
             🔴 Cannot reach backend at: {
-              import.meta.env.VITE_API_URL || (window.location.hostname.includes('onrender.com') 
+              import.meta.env.VITE_API_URL || (window.location.hostname.includes('onrender.com')
                 ? `https://${window.location.hostname.replace('-client', '-server')}`
                 : 'http://localhost:5000')
             }
@@ -258,7 +261,7 @@ const FileUploadView = () => {
       </div>
 
       <AnimatePresence mode="wait">
-        
+
         {/* Dropzone State */}
         {status === 'idle' && !file && (
           <motion.div
@@ -284,14 +287,14 @@ const FileUploadView = () => {
               transition: "all 0.2s ease",
             }}
           >
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              style={{ display: 'none' }} 
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
               onChange={handleFileSelect}
               accept=".pdf,.txt,.jpg,.jpeg,.png"
             />
-            
+
             <div style={{
               width: 64,
               height: 64,
@@ -305,7 +308,7 @@ const FileUploadView = () => {
             }}>
               <UploadCloud size={32} />
             </div>
-            
+
             <p style={{ color: "white", fontSize: "16px", fontWeight: "500", margin: "0 0 8px" }}>
               Drag & drop intel here
             </p>
@@ -343,9 +346,9 @@ const FileUploadView = () => {
                   </p>
                 </div>
               </div>
-              
+
               {status === 'idle' && (
-                <button 
+                <button
                   onClick={clearSelection}
                   style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: "4px" }}
                 >
@@ -357,7 +360,7 @@ const FileUploadView = () => {
             {/* Error Message */}
             {status === 'error' && (
               <div style={{
-                padding: "12px", background: "rgba(248,113,113,0.1)", 
+                padding: "12px", background: "rgba(248,113,113,0.1)",
                 border: "1px solid rgba(248,113,113,0.2)", borderRadius: "10px",
                 color: "#f87171", fontSize: "13px", display: "flex", alignItems: "center", gap: "8px",
                 marginBottom: "16px"
@@ -393,7 +396,7 @@ const FileUploadView = () => {
                 {/* Progress Bar Track */}
                 <div style={{ width: "100%", height: "4px", background: "rgba(255,255,255,0.1)", borderRadius: "2px", overflow: "hidden" }}>
                   {/* Progress Fill */}
-                  <motion.div 
+                  <motion.div
                     initial={{ width: "5%" }}
                     animate={{ width: status === 'uploading' ? "10%" : status === 'processing' ? "75%" : "100%" }}
                     transition={{ duration: 2, ease: "linear" }}
@@ -449,10 +452,10 @@ const FileUploadView = () => {
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                   {jobResult.keywords.map((kw, i) => (
-                    <span key={i} style={{ 
-                      padding: "6px 12px", background: "rgba(16,185,129,0.1)", 
-                      border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", 
-                      borderRadius: "20px", fontSize: "13px", fontWeight: "500" 
+                    <span key={i} style={{
+                      padding: "6px 12px", background: "rgba(16,185,129,0.1)",
+                      border: "1px solid rgba(16,185,129,0.3)", color: "#10b981",
+                      borderRadius: "20px", fontSize: "13px", fontWeight: "500"
                     }}>
                       {kw}
                     </span>
@@ -462,18 +465,18 @@ const FileUploadView = () => {
             )}
 
             <button
-               onClick={clearSelection}
-               style={{
-                 width: "100%", padding: "12px", background: "transparent", color: "white",
-                 border: "1px solid rgba(255,255,255,0.2)", borderRadius: "10px", fontSize: "13px",
-                 marginTop: "24px", cursor: "pointer", transition: "all 0.2s"
-               }}
-               onMouseEnter={(e) => {
-                 e.target.style.background = "rgba(255,255,255,0.1)";
-               }}
-               onMouseLeave={(e) => {
-                 e.target.style.background = "transparent";
-               }}
+              onClick={clearSelection}
+              style={{
+                width: "100%", padding: "12px", background: "transparent", color: "white",
+                border: "1px solid rgba(255,255,255,0.2)", borderRadius: "10px", fontSize: "13px",
+                marginTop: "24px", cursor: "pointer", transition: "all 0.2s"
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "transparent";
+              }}
             >
               Analyze Another Document
             </button>
