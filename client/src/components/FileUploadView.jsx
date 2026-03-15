@@ -73,27 +73,51 @@ const FileUploadView = () => {
     
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('userId', 'user_123'); // Fixed user for demo purposes
+    formData.append('userId', 'user_123');
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      console.log('Targeting API URL:', apiUrl); // Debug log
+      let apiUrl = import.meta.env.VITE_API_URL;
+      
+      if (!apiUrl) {
+        const hostname = window.location.hostname;
+        if (hostname.includes('onrender.com')) {
+          const serverName = hostname.replace('-client', '-server');
+          apiUrl = `https://${serverName}`;
+        } else {
+          apiUrl = 'http://localhost:5000';
+        }
+      }
+
+      console.log('🚀 Initiating upload sequence to:', `${apiUrl}/api/upload`);
+      
+      // Use AbortController for a 15-second timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       const response = await fetch(`${apiUrl}/api/upload`, {
         method: 'POST',
         body: formData,
-      });
+        signal: controller.signal
+      }).finally(() => clearTimeout(timeoutId));
 
       if (!response.ok) {
-        throw new Error('Failed to upload file');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.details || errorData.error || 'Upload failed');
       }
 
       const data = await response.json();
+      console.log('✅ Upload successful, jobId:', data.jobId);
       setJobId(data.jobId);
       setStatus('processing');
     } catch (err) {
-      console.error(err);
+      console.error('❌ UPLOAD FAILURE:', err);
       setStatus('error');
-      setErrorMessage('Upload failed. Please check server connection.');
+      
+      if (err.name === 'AbortError') {
+        setErrorMessage('Connection timed out. Is the backend URL correct?');
+      } else {
+        setErrorMessage(err.message || 'Upload failed. Check server status/logs.');
+      }
     }
   };
 
@@ -103,7 +127,14 @@ const FileUploadView = () => {
     
     const checkJobStatus = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        let apiUrl = import.meta.env.VITE_API_URL;
+        if (!apiUrl) {
+          const hostname = window.location.hostname;
+          apiUrl = hostname.includes('onrender.com') 
+            ? `https://${hostname.replace('-client', '-server')}` 
+            : 'http://localhost:5000';
+        }
+
         const response = await fetch(`${apiUrl}/api/job/${jobId}`);
         if (response.ok) {
           const data = await response.json();
@@ -124,13 +155,36 @@ const FileUploadView = () => {
     };
 
     if (status === 'processing' && jobId) {
-      interval = setInterval(checkJobStatus, 2000); // Poll every 2 seconds
+      interval = setInterval(checkJobStatus, 2000);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [status, jobId]);
+
+  // Diagnostic: Check backend connection on mount
+  const [connStatus, setConnStatus] = useState('checking');
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        let apiUrl = import.meta.env.VITE_API_URL;
+        if (!apiUrl) {
+          const hostname = window.location.hostname;
+          apiUrl = hostname.includes('onrender.com') 
+            ? `https://${hostname.replace('-client', '-server')}` 
+            : 'http://localhost:5000';
+        }
+        
+        const res = await fetch(`${apiUrl}/api/health`, { method: 'GET' });
+        if (res.ok) setConnStatus('online');
+        else setConnStatus('offline');
+      } catch (e) {
+        setConnStatus('offline');
+      }
+    };
+    checkConnection();
+  }, []);
 
   return (
     <div style={{
@@ -147,13 +201,60 @@ const FileUploadView = () => {
       fontFamily: "'Inter', sans-serif"
     }}>
       
-      <div style={{ marginBottom: "24px", textAlign: "center" }}>
+      <div style={{ marginBottom: "24px", textAlign: "center", position: "relative" }}>
+        {/* Connection Indicator */}
+        <div style={{
+          position: "absolute",
+          top: "0",
+          right: "0",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          background: "rgba(255,255,255,0.03)",
+          padding: "4px 10px",
+          borderRadius: "20px",
+          fontSize: "10px",
+          fontWeight: "600",
+          letterSpacing: "0.05em",
+          color: connStatus === 'online' ? "#10b981" : connStatus === 'offline' ? "#ef4444" : "rgba(255,255,255,0.4)"
+        }}>
+          <div style={{
+            width: "6px",
+            height: "6px",
+            borderRadius: "50%",
+            background: connStatus === 'online' ? "#10b981" : connStatus === 'offline' ? "#ef4444" : "rgba(255,255,255,0.2)",
+            boxShadow: connStatus === 'online' ? "0 0 8px #10b981" : "none",
+            animation: connStatus === 'checking' ? "pulse 1.5s infinite" : "none"
+          }} />
+          {connStatus.toUpperCase()}
+        </div>
+
         <h2 style={{ color: "white", fontSize: "20px", fontWeight: "600", margin: "0 0 8px 0" }}>
           Neural Document Processing
         </h2>
         <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "14px", margin: 0 }}>
           Upload Intel (PDF, TXT, Images) for deep semantic analysis
         </p>
+
+        {/* Diagnostic URL Warning */}
+        {connStatus === 'offline' && (
+          <div style={{
+            marginTop: "12px",
+            padding: "8px 12px",
+            background: "rgba(239,68,68,0.1)",
+            border: "1px solid rgba(239,68,68,0.2)",
+            borderRadius: "10px",
+            color: "#ef4444",
+            fontSize: "11px",
+            display: "inline-block"
+          }}>
+            🔴 Cannot reach backend at: {
+              import.meta.env.VITE_API_URL || (window.location.hostname.includes('onrender.com') 
+                ? `https://${window.location.hostname.replace('-client', '-server')}`
+                : 'http://localhost:5000')
+            }
+          </div>
+        )}
       </div>
 
       <AnimatePresence mode="wait">

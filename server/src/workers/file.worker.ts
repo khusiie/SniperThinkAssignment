@@ -13,13 +13,22 @@ const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', 
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
   keepAlive: 10000,
+  connectTimeout: 10000,
   retryStrategy(times) {
+    if (times > 10) {
+      console.error('❌ WORKER REDIS CRITICAL FAILURE: Could not connect after 10 attempts.');
+      return null;
+    }
     return Math.min(times * 50, 2000);
   },
 });
 
 connection.on('error', (err) => {
-  // Silent handler to keep the dashboard clean.
+  console.error('❌ WORKER REDIS ERROR:', err.message);
+});
+
+connection.on('connect', () => {
+  console.log('✅ Worker connected to Redis');
 });
 
 const worker = new Worker(

@@ -21,12 +21,22 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: '*',
+  origin: process.env.FRONTEND_URL || '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 app.use(express.json());
 app.use('/api', uploadRoutes);
+
+// Health Check for Render Connection Diagnostics
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', serverTime: new Date().toISOString() });
+});
+
+app.get('/api/ping', (req, res) => {
+  res.status(200).send('pong');
+});
 
 // Part 1: Simple Interest API
 app.post('/api/interest', async (req, res) => {

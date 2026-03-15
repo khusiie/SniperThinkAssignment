@@ -13,7 +13,22 @@ const InterestForm = ({ stepTitle, expanded, setExpanded }) => {
     setStatus('loading');
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // Improved URL detection for Render/Deploys
+      let apiUrl = import.meta.env.VITE_API_URL;
+      
+      if (!apiUrl) {
+        const hostname = window.location.hostname;
+        if (hostname.includes('onrender.com')) {
+          const serverName = hostname.replace('-client', '-server');
+          apiUrl = `https://${serverName}`;
+          console.log('⚠️ VITE_API_URL missing, inferred server URL:', apiUrl);
+        } else {
+          apiUrl = 'http://localhost:5000';
+          console.log('⚠️ VITE_API_URL missing, falling back to local:', apiUrl);
+        }
+      }
+
+      console.log('🚀 Sending interest to:', `${apiUrl}/api/interest`);
       const response = await fetch(`${apiUrl}/api/interest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -26,11 +41,13 @@ const InterestForm = ({ stepTitle, expanded, setExpanded }) => {
         setFormData({ name: '', email: '' });
         setExpanded(false);
       } else {
-        throw new Error('Server error');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Server error');
       }
     } catch (err) {
+      console.error('❌ INTEREST ERROR:', err);
       setStatus('error');
-      setMessage('Connection failed. Please try again.');
+      setMessage(err.message || 'Connection failed. Please try again.');
     }
   };
 

@@ -10,14 +10,22 @@ const connection = new Redis(redisUrl, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false, // Recommended for Upstash/Serverless Redis
   keepAlive: 10000,
+  connectTimeout: 10000, // 10 second timeout for initial connection
   retryStrategy(times) {
+    if (times > 10) {
+      console.error('❌ REDIS CRITICAL FAILURE: Could not connect after 10 attempts.');
+      return null; // Stop retrying
+    }
     return Math.min(times * 50, 2000);
   },
 });
 
 connection.on('error', (err) => {
-  // Silent handler: ioredis handles reconnection automatically.
-  // We silence this to keep your Render dashboard clean.
+  console.error('❌ REDIS ERROR:', err.message);
+});
+
+connection.on('connect', () => {
+  console.log('✅ Connected to Redis');
 });
 
 export const fileQueue = new Queue('file-processing', { connection: connection as any });
@@ -27,9 +35,16 @@ fileQueue.on('error', (err) => {
 });
 
 export const addFileJob = async (jobId: string, filePath: string) => {
-  await fileQueue.add('process-file', { jobId, filePath }, {
-    jobId: jobId, // Use database job ID as BullMQ job ID
-    removeOnComplete: true,
-    removeOnFail: false,
-  });
+  console.log(`🔄 [Queue] Attempting to add process-file job for jobId: ${jobId}`);
+  try {
+    await fileQueue.add('process-file', { jobId, filePath }, {
+      jobId: jobId, // Use database job ID as BullMQ job ID
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
+    console.log('✅ [Queue] Job successfully added to BullMQ');
+  } catch (err: any) {
+    console.error('❌ [Queue] Failed to add job to BullMQ:', err.message);
+    throw err;
+  }
 };

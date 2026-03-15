@@ -5,11 +5,17 @@ import { addFileJob } from '../services/queue.service';
 const prisma = new PrismaClient();
 
 export const uploadFile = async (req: Request, res: Response) => {
-  const { userId } = req.body;
-  const file = req.file;
+  let userId: string | undefined;
+  let uploadedFile: Express.Multer.File | undefined;
+
+  console.log('📥 [Backend] Received upload request');
 
   try {
-    if (!file) {
+    userId = req.body.userId;
+    uploadedFile = req.file;
+
+    if (!uploadedFile) {
+      console.warn('⚠️ [Backend] No file attached in request');
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
@@ -21,7 +27,7 @@ export const uploadFile = async (req: Request, res: Response) => {
     const fileRecord = await prisma.file.create({
       data: {
         userId,
-        filePath: file.path,
+        filePath: uploadedFile.path,
       },
     });
 
@@ -34,7 +40,7 @@ export const uploadFile = async (req: Request, res: Response) => {
     });
 
     // 3. Add to BullMQ
-    await addFileJob(jobRecord.id, file.path);
+    await addFileJob(jobRecord.id, uploadedFile.path);
 
     res.status(201).json({
       message: 'File uploaded and job queued',
@@ -44,8 +50,8 @@ export const uploadFile = async (req: Request, res: Response) => {
     console.error('CRITICAL UPLOAD ERROR:', {
       message: error.message,
       stack: error.stack,
-      file: file ? { path: file.path, size: file.size } : 'NONE',
-      userId
+      file: uploadedFile ? { path: uploadedFile.path, size: uploadedFile.size } : 'NONE',
+      userId: userId || 'NONE'
     });
     res.status(500).json({ 
       error: 'Backend Failure', 
