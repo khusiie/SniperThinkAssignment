@@ -3,6 +3,7 @@ import Redis from 'ioredis';
 
 const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
+  enableReadyCheck: false, // Recommended for Upstash/Serverless Redis
   keepAlive: 10000,
   retryStrategy(times) {
     return Math.min(times * 50, 2000);
@@ -10,7 +11,8 @@ const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', 
 });
 
 connection.on('error', (err) => {
-  console.error('Redis Connection Error (Queue):', err.message);
+  // Use warn instead of error to avoid scary red logs on Render dashboard
+  console.warn('Redis Connection (Queue) - Optional reset:', err.message);
 });
 
 export const fileQueue = new Queue('file-processing', { connection: connection as any });

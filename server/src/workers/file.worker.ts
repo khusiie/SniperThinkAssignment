@@ -11,6 +11,7 @@ const prisma = new PrismaClient();
 
 const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
+  enableReadyCheck: false,
   keepAlive: 10000,
   retryStrategy(times) {
     return Math.min(times * 50, 2000);
@@ -18,7 +19,7 @@ const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', 
 });
 
 connection.on('error', (err) => {
-  console.error('Redis Connection Error (Worker):', err.message);
+  console.warn('Redis Connection (Worker) - Optional reset:', err.message);
 });
 
 const worker = new Worker(
