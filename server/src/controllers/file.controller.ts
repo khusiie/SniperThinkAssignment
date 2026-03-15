@@ -5,10 +5,10 @@ import { addFileJob } from '../services/queue.service';
 const prisma = new PrismaClient();
 
 export const uploadFile = async (req: Request, res: Response) => {
-  try {
-    const { userId } = req.body;
-    const file = req.file;
+  const { userId } = req.body;
+  const file = req.file;
 
+  try {
     if (!file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
