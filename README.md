@@ -2,7 +2,7 @@
 
 A premium, high-performance file processing system built with React, Node.js, and a distributed job queue architecture.
 
-🚀 **Live Site**: [https://sniperthinkassignment.onrender.com/](https://sniperthinkassignment.onrender.com/)
+ **Live Site**: [https://sniperthinkassignment.onrender.com/](https://sniperthinkassignment.onrender.com/)
 
 ---
 
