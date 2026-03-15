@@ -13,16 +13,6 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-
-// Health Check
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-app.get('/', (req, res) => {
-  res.send('SniperThink Backend is Running');
-});
-
 app.use('/api', uploadRoutes);
 
 // Part 1: Simple Interest API
