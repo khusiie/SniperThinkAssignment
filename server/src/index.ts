@@ -1,11 +1,11 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import uploadRoutes from './routes/upload.routes';
 import './workers/file.worker'; // Start the worker
-
-dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
