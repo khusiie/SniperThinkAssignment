@@ -5,6 +5,10 @@ const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', 
   maxRetriesPerRequest: null,
 });
 
+connection.on('error', (err) => {
+  console.error('Redis Connection Error (Queue):', err.message);
+});
+
 export const fileQueue = new Queue('file-processing', { connection: connection as any });
 
 export const addFileJob = async (jobId: string, filePath: string) => {

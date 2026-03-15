@@ -13,6 +13,10 @@ const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', 
   maxRetriesPerRequest: null,
 });
 
+connection.on('error', (err) => {
+  console.error('Redis Connection Error (Worker):', err.message);
+});
+
 const worker = new Worker(
   'file-processing',
   async (bullJob: BullJob) => {
