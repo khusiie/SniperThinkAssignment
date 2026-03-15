@@ -6,8 +6,17 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import uploadRoutes from './routes/upload.routes';
 import './workers/file.worker'; // Start the worker
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
