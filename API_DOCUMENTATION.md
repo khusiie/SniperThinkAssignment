@@ -8,7 +8,7 @@ This document outlines the API endpoints available in the SniperThink backend.
 
 ---
 
-## 🚦 System Health
+## System Health
 
 ### 1. Health Check
 Quickly verify server and database connectivity.
@@ -26,7 +26,7 @@ Lightweight endpoint for frontend connectivity testing.
 
 ---
 
-## 📂 File Processing
+##  File Processing
 
 ### 3. File Upload
 Upload a file (PDF or TXT) for asynchronous processing.
@@ -59,7 +59,7 @@ Retrieve the current status and processed results of a specific job.
 
 ---
 
-## 📈 Lead Generation
+##  Lead Generation
 
 ### 5. Strategy Interest (Part 1)
 Record user interest in specific strategy steps.
