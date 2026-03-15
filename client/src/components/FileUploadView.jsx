@@ -206,7 +206,7 @@ const FileUploadView = () => {
 
       <div style={{ marginBottom: "24px", textAlign: "center", position: "relative" }}>
         {/* Connection Indicator */}
-        <div style={{
+        <div className="conn-indicator" style={{
           position: "absolute",
           top: "0",
           right: "0",
@@ -426,7 +426,7 @@ const FileUploadView = () => {
               <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "600" }}>Analysis Complete</h3>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
+            <div className="upload-stats-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
               {/* Stat Card 1 */}
               <div style={{ background: "rgba(0,0,0,0.3)", padding: "16px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.05)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "rgba(255,255,255,0.4)", fontSize: "12px", marginBottom: "8px" }}>

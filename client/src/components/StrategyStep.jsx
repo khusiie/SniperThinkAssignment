@@ -61,6 +61,7 @@ const StrategyStep = ({ step, index, total }) => {
     <section
       ref={sectionRef}
       id={`step-${step.id}`}
+      className="strategy-step-section"
       style={{
         minHeight: "80vh",
         display: "flex",
@@ -108,7 +109,7 @@ const StrategyStep = ({ step, index, total }) => {
       }} />
 
       {/* Main grid */}
-      <div style={{
+      <div className="strategy-step-grid" style={{
         maxWidth: "1200px",
         width: "100%",
         margin: "0 auto",

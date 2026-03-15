@@ -7,10 +7,10 @@ function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
       <div className="App" style={{ paddingBottom: '100px' }}>
-        <main>
+        <main className="app-main-container">
           <StrategyFlow />
-          
-          <div style={{ marginTop: '40px' }}>
+
+          <div className="upload-view-wrapper" style={{ marginTop: '40px' }}>
             <FileUploadView />
           </div>
         </main>
