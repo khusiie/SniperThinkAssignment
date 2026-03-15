@@ -76,7 +76,8 @@ const FileUploadView = () => {
     formData.append('userId', 'user_123'); // Fixed user for demo purposes
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -101,7 +102,8 @@ const FileUploadView = () => {
     
     const checkJobStatus = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/job/${jobId}`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${apiUrl}/api/job/${jobId}`);
         if (response.ok) {
           const data = await response.json();
           

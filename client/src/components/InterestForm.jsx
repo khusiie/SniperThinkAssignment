@@ -13,7 +13,8 @@ const InterestForm = ({ stepTitle, expanded, setExpanded }) => {
     setStatus('loading');
 
     try {
-      const response = await fetch('http://localhost:5000/api/interest', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/interest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, step: stepTitle }),
