@@ -1,7 +1,12 @@
 import { Queue } from 'bullmq';
 import Redis from 'ioredis';
 
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+if (!process.env.REDIS_URL) {
+  console.warn('⚠️ REDIS_URL not found in environment. Falling back to localhost.');
+}
+
+const connection = new Redis(redisUrl, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false, // Recommended for Upstash/Serverless Redis
   keepAlive: 10000,
