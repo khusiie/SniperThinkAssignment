@@ -6,7 +6,7 @@ A premium, high-performance file processing system built with React, Node.js, an
 
 ---
 
-## ⚡ Key Features
+## Key Features
 - **Neural Document Processing**: Asynchronous file analysis (PDF/TXT) using BullMQ workers.
 - **Distributed Queue**: Scalable job management via Upstash Redis.
 - **Managed Auth & DB**: PostgreSQL hosted on Supabase (Prisma ORM).
@@ -15,7 +15,7 @@ A premium, high-performance file processing system built with React, Node.js, an
 
 ---
 
-## 🛠️ Stack
+##  Stack
 - **Frontend**: React, Vite, Framer Motion, Lucide Icons, Vanilla CSS (Elite Aesthetics).
 - **Backend**: Node.js, Express, TypeScript, Multer.
 - **Message Broker**: Redis (via Upstash).
@@ -24,7 +24,7 @@ A premium, high-performance file processing system built with React, Node.js, an
 
 ---
 
-## 🚀 Deployment Guide (Render)
+##  Deployment Guide (Render)
 
 ### 1. Database (Supabase)
 - Create a project on [Supabase](https://supabase.com/).
@@ -72,7 +72,7 @@ A premium, high-performance file processing system built with React, Node.js, an
 
 ---
 
-## 🔐 Environment Variables Summary
+##  Environment Variables Summary
 
 | Variable | Service | Purpose |
 | :--- | :--- | :--- |
@@ -83,5 +83,5 @@ A premium, high-performance file processing system built with React, Node.js, an
 
 ---
 
-## 📝 API Documentation
+##  API Documentation
 Detailed endpoint specifications can be found in [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
