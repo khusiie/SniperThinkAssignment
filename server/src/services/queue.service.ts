@@ -22,6 +22,11 @@ connection.on('error', (err) => {
 
 export const fileQueue = new Queue('file-processing', { connection: connection as any });
 
+fileQueue.on('error', (err) => {
+  // Silence BullMQ connection resets
+  console.warn('Queue Error (Handled):', err.message);
+});
+
 export const addFileJob = async (jobId: string, filePath: string) => {
   await fileQueue.add('process-file', { jobId, filePath }, {
     jobId: jobId, // Use database job ID as BullMQ job ID
