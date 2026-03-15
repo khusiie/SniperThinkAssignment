@@ -112,6 +112,11 @@ const worker = new Worker(
   }
 );
 
+worker.on('error', (err) => {
+  // Silence Worker connection resets
+  console.warn('Worker Error (Handled):', err.message);
+});
+
 console.log('Worker started listening for jobs...');
 
 export default worker;
