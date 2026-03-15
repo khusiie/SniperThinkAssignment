@@ -2,6 +2,8 @@ import { Queue } from 'bullmq';
 import Redis from 'ioredis';
 
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+const isUpstash = redisUrl.includes('upstash.io') || redisUrl.startsWith('rediss://');
+
 if (!process.env.REDIS_URL) {
   console.warn('⚠️ REDIS_URL not found in environment. Falling back to localhost.');
 }
@@ -11,6 +13,7 @@ const connection = new Redis(redisUrl, {
   enableReadyCheck: false, // Recommended for Upstash/Serverless Redis
   keepAlive: 10000,
   connectTimeout: 10000, // 10 second timeout for initial connection
+  tls: isUpstash ? { rejectUnauthorized: false } : undefined,
   retryStrategy(times) {
     if (times > 10) {
       console.error('❌ REDIS CRITICAL FAILURE: Could not connect after 10 attempts.');

@@ -9,11 +9,15 @@ const { PDFParse } = require('pdf-parse');
 
 const prisma = new PrismaClient();
 
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+const isUpstash = redisUrl.includes('upstash.io') || redisUrl.startsWith('rediss://');
+
+const connection = new Redis(redisUrl, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
   keepAlive: 10000,
   connectTimeout: 10000,
+  tls: isUpstash ? { rejectUnauthorized: false } : undefined,
   retryStrategy(times) {
     if (times > 10) {
       console.error('❌ WORKER REDIS CRITICAL FAILURE: Could not connect after 10 attempts.');
