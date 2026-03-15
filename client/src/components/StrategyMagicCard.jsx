@@ -135,6 +135,7 @@ export function StrategyMagicCard({ step, isEven }) {
 
           {/* Inner card */}
           <div
+            className="magic-card-inner"
             style={{
               position: "relative",
               zIndex: 1,
@@ -193,7 +194,7 @@ export function StrategyMagicCard({ step, isEven }) {
             </div>
 
             {/* Stats grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "28px" }}>
+            <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "28px" }}>
               {[
                 { label: "Status", value: "Active" },
                 { label: "Priority", value: "Critical" },
