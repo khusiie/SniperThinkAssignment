@@ -11,6 +11,10 @@ const prisma = new PrismaClient();
 
 const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
+  keepAlive: 10000,
+  retryStrategy(times) {
+    return Math.min(times * 50, 2000);
+  },
 });
 
 connection.on('error', (err) => {
